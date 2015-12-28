@@ -71,18 +71,13 @@ spa.chat = (function () {
     },
     jqueryMap = {},
 
-    setJqueryMap, getEmSize, setPxSizes, setSliderPosition,
+    setJqueryMap, setPxSizes, setSliderPosition,
     onCLickToggle, configModule, initModule,
     removeSlider, handleResize
     ;
   //----------------- END MODULE SCOPE VARIABLES ---------------
 
   //------------------- BEGIN UTILITY METHODS ------------------
-  getEmSize = function ( elem ) {
-    return Number(
-      getComputedStyle( elem, '' ).fontSize.match(/\d*\.?\d*/)[0]
-    );
-  };
   //-------------------- END UTILITY METHODS -------------------
 
   //--------------------- BEGIN DOM METHODS --------------------
@@ -110,7 +105,7 @@ spa.chat = (function () {
       px_per_em, window_height_em, opened_height_em,
       optimized_size_chat;
 
-    px_per_em = getEmSize( jqueryMap.$slider.get(0) );
+    px_per_em = spa.util_b.getEmSize( jqueryMap.$slider.get(0) );
     window_height_em = Math.floor(
       ( $(window).height() / px_per_em ) + 0.5
     );

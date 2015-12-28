@@ -12,7 +12,7 @@
 /*global $, spa */
 
 spa.shell = (function () {
-
+  'use strict';
   //---------------- BEGIN MODULE SCOPE VARIABLES --------------
   var
     configMap = {
@@ -21,7 +21,10 @@ spa.shell = (function () {
       },
       main_html : String()
         + '<div class="spa-shell-head">'
-          + '<div class="spa-shell-head-logo"></div>'
+          + '<div class="spa-shell-head-logo">'
+              + '<h1>SPA</h1>'
+              + '<p>javascript end to end</p>'
+          + '</div>'
           + '<div class="spa-shell-head-acct"></div>'
           + '<div class="spa-shell-head-search"></div>'
         + '</div>'
@@ -42,7 +45,8 @@ spa.shell = (function () {
 
     setJqueryMap, initModule, onResize,
     copyAnchorMap, changeAnchorPart,
-    onHashChange, setCharAnchor;
+    onHashchange, onTapAcct, onLogin, onLogout,
+    setChatAnchor;
   //----------------- END MODULE SCOPE VARIABLES ---------------
 
   //------------------- BEGIN UTILITY METHODS ------------------
@@ -56,7 +60,11 @@ spa.shell = (function () {
   // Begin DOM method /setJqueryMap/
   setJqueryMap = function () {
     var $container = stateMap.$container;
-    jqueryMap = { $container : $container };
+    jqueryMap = { 
+      $container  : $container,
+      $acct       : $container.find( '.spa-shell-head-acct' ),
+      $nav        : $container.find( '.spa-shell-main-nav' )
+    };
   };
   // End DOM method /setJqueryMap/
    
@@ -122,20 +130,6 @@ spa.shell = (function () {
   };
   // End DOM method /changeAnchorPart/
 
-  // Begin callback method /setChatAnchor/
-  // Example  : setChatAnchor( 'closed' );
-  // Purpose  : Change the chat component of the anchor
-  // Arguments:
-  //    * position_type - may be 'closed' or 'opened'
-  // Action   :
-  //    Changes the URI anchor parameter 'chat' to the requested
-  //    value if possible.
-  // Returns  :
-  //    * true  - requested anchor part was updated
-  //    * false - requested anchor part was not updated
-  // Throws   : none
-  //
-  
   //---------------------- END DOM METHODS ---------------------
 
   //------------------- BEGIN EVENT HANDLERS -------------------
@@ -169,7 +163,7 @@ spa.shell = (function () {
     var
       anchor_map_proposed,
       _s_chat_previous, _s_chat_proposed, s_chat_proposed,
-      is_ok = true;
+      is_ok = true,
       anchor_map_previous = copyAnchorMap();
 
     // attempt to parse anchor
@@ -197,7 +191,7 @@ spa.shell = (function () {
           is_ok = spa.chat.setSliderPosition( 'closed' );
         break;
         default :
-          toggleChat( false );
+          spa.chat.setSliderPosition( 'closed' );
           delete anchor_map_proposed.chat;
           $.uriAnchor.setAnchor( anchor_map_proposed, null, true );
       }
@@ -218,6 +212,29 @@ spa.shell = (function () {
     return false;
   };
   // End event handler /onHashchange/
+  
+  onTapAcct = function ( event ) {
+    var acct_text, user_name,
+      user = spa.model.people.get_user();
+
+    if ( user.get_is_anon() ) {
+      user_name = prompt( 'please sing-in' );
+      spa.model.people.login( user_name );
+      jqueryMap.$acct.text( '... processing ...' );
+    }
+    else {
+      spa.model.people.logout();
+    }
+    return false;
+  };
+
+  onLogin = function ( event, login_user ) {
+    jqueryMap.$acct.text( login_user.name );
+  };
+
+  onLogout = function ( event, logout_user) {
+    jqueryMap.$acct.text( 'Please sign-in' );
+  };
   //-------------------- END EVENT HANDLERS --------------------
 
   //-------------------- BEGIN CALLBACKS -----------------------
@@ -288,6 +305,13 @@ spa.shell = (function () {
       .resize( 'resize', onResize )
       .bind( 'hashchange', onHashchange )
       .trigger( 'hashchange' );
+
+    $.gevent.subscribe( $container, 'spa-login', onLogin );
+    $.gevent.subscribe( $container, 'spa-logout', onLogout );
+
+    jqueryMap.$acct
+      .text( 'Please sign-in' )
+      .bind( 'utap', onTapAcct );
   };
   // End public method /initModule/
 
