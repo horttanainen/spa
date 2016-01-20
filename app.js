@@ -28,7 +28,6 @@
 
    server   = http.createServer( app );
 
-  routes();
   //----------------- END MODULE SCOPE VARIABLES ---------------
 
   //------------------- BEGIN SERVER CONFIGURATION ------------------
@@ -49,7 +48,7 @@
     app.use( errorHandler() );
   }
   
-  routes.configRoutes( app. server );
+  routes.configRoutes( app, server );
   //-------------------- END SERVER CONFIGURATION -------------------
 
   //--------------------- BEGIN START SERVER --------------------
